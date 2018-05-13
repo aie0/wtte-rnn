@@ -28,15 +28,7 @@ docs_requires = [
     'sphinx',
 ]
 
-setup(
-    name='wtternn',
-    version='0.2',
-    description='Weibull Time To Event model. A Deep Learning model for churn- and failure prediction and everything else.',
-    author='Librimind Ltd',
-    author_email='victor@librimind.com',
-    url='http://www.librimind.com',
-    license='MIT',
-    install_requires=[
+setup(install_requires=[
         'keras>=2.0',
         'numpy',
         'pandas',
@@ -54,6 +46,5 @@ setup(
     },
     setup_requires=['pytest-runner', 'pbr'],
     tests_require=['pytest'],
-    packages=find_packages('.', exclude=['examples', 'tests']),
     pbr=True,
 )
