@@ -301,7 +301,7 @@ texinfo_documents = [
 def run_apidoc(_):
     from sphinx.apidoc import main
     cur_dir = os.path.abspath(os.path.dirname(__file__))
-    module_dir = os.path.join(root_dir, 'python/wtte')
+    module_dir = os.path.join(root_dir, 'wtternn/wtte')
     main(['-M', '-l', '-o', cur_dir, module_dir, '--force'])
 
 def setup(app):
