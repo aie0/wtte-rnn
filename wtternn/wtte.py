@@ -73,6 +73,23 @@ def output_lambda(x, init_alpha=1.0, max_beta_value=5.0,
         :rtype: Array
 
     """
+
+    def keras_unstack_hack(ab):
+        """Implements tf.unstack(y_true_keras, num=2, axis=-1).
+
+           Keras-hack adopted to be compatible with Theano backend.
+
+           :param ab: stacked variables
+           :return a, b: unstacked variables
+        """
+        ndim = len(K.int_shape(ab))
+        if ndim == 0:
+            print('can not unstack with ndim=0')
+        else:
+            a = ab[..., 0]
+            b = ab[..., 1]
+        return a, b
+
     if max_beta_value is None or max_beta_value > 3:
         if K.epsilon() > 1e-07 and K.backend() == 'tensorflow':
             message = "\
@@ -82,13 +99,13 @@ def output_lambda(x, init_alpha=1.0, max_beta_value=5.0,
             "
             warnings.warn(message)
 
-    a, b = _keras_unstack_hack(x)
+    a, b = keras_unstack_hack(x)
 
     # Implicitly initialize alpha:
     if alpha_kernel_scalefactor is None:
         a = init_alpha * K.exp(a)
     else:
-        a = init_alpha * K.exp(alpha_kernel_scalefactor*a)
+        a = init_alpha * K.exp(alpha_kernel_scalefactor * a)
 
     m = max_beta_value
     if m > 1.05:  # some value >>1.0
@@ -190,8 +207,25 @@ class loss(object):
             """
                 Everything is a hack around the y_true,y_pred paradigm.
             """
-            y, u = _keras_unstack_hack(y_true)
-            a, b = _keras_unstack_hack(y_pred)
+
+            def keras_unstack_hack(ab):
+                """Implements tf.unstack(y_true_keras, num=2, axis=-1).
+
+                   Keras-hack adopted to be compatible with Theano backend.
+
+                   :param ab: stacked variables
+                   :return a, b: unstacked variables
+                """
+                ndim = len(K.int_shape(ab))
+                if ndim == 0:
+                    print('can not unstack with ndim=0')
+                else:
+                    a = ab[..., 0]
+                    b = ab[..., 1]
+                return a, b
+
+            y, u = keras_unstack_hack(y_true)
+            a, b = keras_unstack_hack(y_pred)
 
             return y, u, a, b
 
@@ -200,7 +234,7 @@ class loss(object):
             hazard1 = K.pow((y + 1.0) / a, b)
 
             loglikelihoods = u * \
-                K.log(K.exp(hazard1 - hazard0) - 1.0) - hazard1
+                             K.log(K.exp(hazard1 - hazard0) - 1.0) - hazard1
             return loglikelihoods
 
         def loglik_continuous(y, u, a, b, epsilon=1e-35):
@@ -214,7 +248,7 @@ class loss(object):
             """
             ya = (y + epsilon) / a
             loglikelihoods = y * \
-                (u * (K.log(b) + b * K.log(ya)) - (b / (b + 1.)) * K.pow(ya, b))
+                             (u * (K.log(b) + b * K.log(ya)) - (b / (b + 1.)) * K.pow(ya, b))
             return loglikelihoods
 
         def penalty_term(b, location, growth):
@@ -235,7 +269,7 @@ class loss(object):
 
         if self.regularize:
             loglikelihoods = loglikelihoods + \
-                penalty_term(b, self.location, self.growth)
+                             penalty_term(b, self.location, self.growth)
 
         if self.reduce_loss:
             loss = accumulate_loss(loglikelihoods)

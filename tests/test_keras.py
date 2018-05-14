@@ -12,8 +12,8 @@ from keras.layers.wrappers import TimeDistributed
 
 from keras.optimizers import RMSprop
 
-from wtte import wtte as wtte
-from wtte.data_generators import generate_weibull
+from wtternn import wtte as wtte
+from wtternn.data_generators import generate_weibull
 
 
 def test_keras_unstack_hack():
